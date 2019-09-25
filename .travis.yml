@@ -1,0 +1,40 @@
+language: julia
+os:
+  - linux
+julia:
+  - 1.0
+notifications:
+  email: false
+git:
+  depth: 99999999
+cache:
+  timeout: 1000
+  directories:
+    - downloads
+env:
+  global:
+    - BINARYBUILDER_DOWNLOADS_CACHE=downloads
+    - BINARYBUILDER_AUTOMATIC_APPLE=true
+sudo: required
+
+# Before anything else, get the latest versions of things
+before_script:
+  - julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/JuliaPackaging/BinaryProvider.jl"))'
+  - julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/JuliaPackaging/BinaryBuilder.jl")); Pkg.build()'
+
+script:
+  - julia build_tarballs.jl
+
+
+deploy:
+    provider: releases
+    api_key:
+        # Note; this api_key is only valid for ericphanson/SDPA_GMP_Builder; you need
+        # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+        secure: "vhvPbu97mV0ICwZ0emTFjBjCJ68f+VGMUh+AWNMPZAwiquIFmVtFGTgzPFkYIfVPY6tiLXeF2Fwssbpvpd3Ng5f1jzKjNx7lamn3Ki2GQbaNP2FvzOLTLSEPbnMFUH2IX8iiJbaOfWzSFXKboTouAPIp/FridTp3lz5/M0jjHG6em404OHVwAj67s1BaQWtamjDm2Ri5a/gyp8ENwM9GDoMV1Q6pKww5u2ds3ro/sOAh2IKksrxjz1gu5Yp2d3gJj9F2rbsx1A2mOfHWORbA0H9gTHbGEjEnOnPLgMQCjgiSKqSgHw6BxTnzn+FwLQkzeQM1mey1j6r/BHpBQRebnhtRJy8q6jbxCIEF0HO+8xMox+5q/RjWNbZRVlY4d5+WF+Htbyq3iBeKepWFrwnBuWj+jqtSY3kURPOGpzEX/ChXv9UX2pZOdt5KBUAtJL8sOJOqQ52qjw9+Zv4lyHmGBtyTxZhbLxdjnMKNhxa1xko2q8TgjBa1vYATMLHn0gOx2IeV0O0LMPlZo8qi1S7rWrl2uaE4SLtUwv8E5P9s/wQg8nStzvfvG7o+DR2BoZiSwk9Uook8GX05gbR75UDRND76agEC//jFlYAaBViMnuyoXRvF7B8gNOJEQoN+4adrFgtpRwziGyMyPTFlFugGZ6mE76hevhC4F/TQFQErKuQ="
+    file_glob: true
+    file: products/*
+    skip_cleanup: true
+    on:
+        repo: ericphanson/SDPA_GMP_Builder
+        tags: true
